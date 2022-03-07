@@ -37,9 +37,9 @@ jobs:
  
       - name: Download lede
         run: |
-          git clone https://github.com/coolsnowwolf/lede
+          git clone https://github.com/coolsnowwolf/lede          
+          cp .config ./lede/.config
           mv ./lede/* ./
-#          cp .config ./lede/.config
           
           
 #      - name: Install Helloword
@@ -69,14 +69,14 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
-      - name: Generate configuration file
-        run: |
-          make defconfig
+#      - name: Generate configuration file
+#        run: |
+#          make defconfig
           
       - name: up config
         uses: itsmine/upload-artifact@master
         with:
-          name: OpenWrt_package
+          name: OpenWrt_config
           path: ./.config
           
       - name: Download package source code
