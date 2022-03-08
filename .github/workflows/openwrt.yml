@@ -39,7 +39,7 @@ jobs:
       - name: Download lede
         run: |
           git clone https://github.com/coolsnowwolf/lede          
-          cd lede
+                    mv ./lede/* ./
           
           
 #      - name: Install Helloword
@@ -75,7 +75,7 @@ jobs:
 
       - name: Copy configuration file
         run: |
-          cp ../diyconf/.config ./.config
+          cp ./diyconf/.config ./.config
           
       - name: Upload configuration file
         uses: itsmine/upload-artifact@master
