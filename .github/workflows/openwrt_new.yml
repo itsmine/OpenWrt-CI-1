@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: openwrt-CI
+name: openwrt-new-CI
 
 on:
   workflow_dispatch:
@@ -85,7 +85,7 @@ jobs:
 
       - name: Copy configuration file
         run: |
-          cp ./diyconf/.config ./.config
+          cp ./diyconf/new.config ./.config
           
       - name: Upload configuration file
         uses: itsmine/upload-artifact@master
