@@ -14,25 +14,72 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@master
+    - name: Before freeing up disk space
+      run: |
+        echo "Before freeing up disk space"
+        echo "=============================================================================="
+        df -hT
+        echo "=============================================================================="
 
-      - name: Initialization environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          docker rmi `docker images -q`
-          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
-          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* || true
-          sudo -E apt-get update
-          sudo -E apt-get -y install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-          sudo -E apt-get -y autoremove --purge
-          sudo -E apt-get clean
-          df -h
+    - name: "Optimize Disk Space"
+      uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
+      with:
+        operate_sudo: "True"
+        general_include: ".+"
+        general_exclude: |-
+          ^GCC$
+          ^G\+\+$
+          Clang
+          LLVM
+        docker_include: ".+"
+        docker_prune: "True"
+        docker_clean: "True"
+        apt_prune: "True"
+        apt_clean: "True"
+        homebrew_prune: "True"
+        homebrew_clean: "True"
+        npm_prune: "True"
+        npm_clean: "True"
+        os_swap: "True"
+
+    - name: Freeing up disk space
+      uses: easimon/maximize-build-space@master
+      with: 
+        root-reserve-mb: 2048
+        swap-size-mb: 1
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        remove-docker-images: 'true'
+
+    - name: Free up disk space complete
+      run: |
+        echo "Free up disk space complete"
+        echo "=============================================================================="
+        df -hT
+        echo "=============================================================================="
+
+    
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi `docker images -q`
+        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
+        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* || true
+        sudo -E apt-get update
+        sudo -E apt-get -y install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+        df -h
 #          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf swig
           
           
@@ -40,11 +87,10 @@ jobs:
  #         sudo -E apt-get -yqq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib
  #         sudo -E apt-get -y autoremove --purge
  #         sudo -E apt-get clean
- 
-      - name: Download lede
-        run: |
-          git clone https://github.com/coolsnowwolf/lede          
-          mv ./lede/* ./
+    - name: Download lede
+      run: |
+        git clone https://github.com/coolsnowwolf/lede          
+        mv ./lede/* ./
           
           
 #      - name: Install Helloword
@@ -65,8 +111,8 @@ jobs:
 #          make && sudo make install
 #          popd
 
-      - name: Update feeds
-        run: |
+    - name: Update feeds
+      run: |
          sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
          sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' ./feeds.conf.default
          sed -i '$a src-git small https://github.com/kenzok8/small' ./feeds.conf.default
@@ -83,24 +129,24 @@ jobs:
 #        run: |
 #          make defconfig
 
-      - name: Copy configuration file
-        run: |
+    - name: Copy configuration file
+      run: |
           cp ./diyconf/new.config ./.config
           
-      - name: Upload configuration file
-        uses: itsmine/upload-artifact@master
-        with:
+    - name: Upload configuration file
+      uses: itsmine/upload-artifact@master
+      with:
           name: OpenWrt_config
           path: ./.config
           
-      - name: Download package source code
-        run: |
+    - name: Download package source code
+      run: |
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
           
-      - name: Compile firmware
-        run: |
+    - name: Compile firmware
+      run: |
           make -j$(nproc) || make -j1 V=s
           echo "======================="
           echo "Space usage:"
@@ -111,8 +157,8 @@ jobs:
           du -h --max-depth=1 ./build_dir
           du -h --max-depth=1 ./bin
        
-      - name: Prepare artifact
-        run: |
+    - name: Prepare artifact
+      run: |
           mkdir -p ./artifact/firmware
           mkdir -p ./artifact/package
           mkdir -p ./artifact/buildinfo
@@ -121,20 +167,20 @@ jobs:
           cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
           cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/ 
           
-      - name: Deliver buildinfo
-        uses: itsmine/upload-artifact@master
-        with:
+    - name: Deliver buildinfo
+      uses: itsmine/upload-artifact@master
+      with:
           name: OpenWrt_buildinfo
           path: ./artifact/buildinfo/
 
-      - name: Deliver package
-        uses: itsmine/upload-artifact@master
-        with:
+    - name: Deliver package
+      uses: itsmine/upload-artifact@master
+      with:
           name: OpenWrt_package
           path: ./artifact/package/
           
-      - name : Upload artifact
-        uses: itsmine/upload-artifact@master
-        with:
+    - name : Upload artifact
+      uses: itsmine/upload-artifact@master
+      with:
           name: OpenWrt_firmware
           path: bin/targets/
