@@ -124,7 +124,7 @@ jobs:
           cp ./diyconf/new.config ./.config
           
     - name: Upload configuration file
-      uses: itsmine/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
           name: OpenWrt_config
           path: ./.config
@@ -158,19 +158,19 @@ jobs:
           cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/ 
           
     - name: Deliver buildinfo
-      uses: itsmine/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
           name: OpenWrt_buildinfo
           path: ./artifact/buildinfo/
 
     - name: Deliver package
-      uses: itsmine/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
           name: OpenWrt_package
           path: ./artifact/package/
           
     - name : Upload artifact
-      uses: itsmine/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
           name: OpenWrt_firmware
           path: bin/targets/
